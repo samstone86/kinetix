@@ -106,3 +106,23 @@ npm run build
 # Preview production build locally
 npm run preview
 ```
+
+---
+
+## 🌐 Deployment (GitHub Pages)
+
+This project is pre-configured for automated deployment to **GitHub Pages** via GitHub Actions (`.github/workflows/deploy.yml`).
+
+- **Expected GitHub Pages URL**: [`https://samstone86.github.io/kinetix/`](https://samstone86.github.io/kinetix/)
+- **Base Path Handling**:
+  - When building in **GitHub Actions** (`GITHUB_ACTIONS=true`), Vite automatically sets `base: '/kinetix/'` and updates the PWA manifest (`id`, `start_url`, `scope`, and icon paths) plus HTML icon references (`%BASE_URL%`) so all assets resolve under `/kinetix/`.
+  - During **local development** (`bun run dev` / `npm run dev`), the base path remains `/`.
+- **CI Workflow**:
+  - Triggered automatically on pushes to `main` (or manually via `workflow_dispatch`).
+  - Uses **Bun** (`oven-sh/setup-bun@v2` + `bun install --frozen-lockfile`) and runs `bun run build` before uploading `./dist` and deploying with the official `actions/configure-pages`, `actions/upload-pages-artifact`, and `actions/deploy-pages` actions.
+
+### Manual GitHub Repository Setup
+1. Open your repository on GitHub and navigate to **Settings → Pages**.
+2. Under **Build and deployment → Source**, select **GitHub Actions**.
+3. Push to the `main` branch (or trigger the **Deploy to GitHub Pages** workflow from the **Actions** tab) to publish the live build.
+

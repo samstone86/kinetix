@@ -4,8 +4,11 @@ import path from 'path';
 import {defineConfig} from 'vite';
 import {VitePWA} from 'vite-plugin-pwa';
 
-export default defineConfig(() => {
+export default defineConfig(({command}) => {
+  const base = command === 'build' && process.env.GITHUB_ACTIONS === 'true' ? '/kinetix/' : '/';
+
   return {
+    base,
     plugins: [
       react(),
       tailwindcss(),
@@ -13,7 +16,7 @@ export default defineConfig(() => {
         registerType: 'autoUpdate',
         includeAssets: ['icon.svg', 'apple-touch-icon.png'],
         manifest: {
-          id: '/',
+          id: base,
           name: 'Kinetix // 11 — 3D Synth-Grid Arcade Vault',
           short_name: 'Kinetix 11',
           description: 'An 11-in-1 3D WebGL synth-grid arcade vault featuring Gauntlet Blitz mode, Prism Drop, Cyber Pac, Void Runner, Nova Invaders, and more.',
@@ -21,23 +24,23 @@ export default defineConfig(() => {
           background_color: '#07090E',
           display: 'standalone',
           orientation: 'portrait-primary',
-          start_url: '/',
-          scope: '/',
+          start_url: base,
+          scope: base,
           icons: [
             {
-              src: '/pwa-192x192.png',
+              src: `${base}pwa-192x192.png`,
               sizes: '192x192',
               type: 'image/png',
               purpose: 'any',
             },
             {
-              src: '/pwa-512x512.png',
+              src: `${base}pwa-512x512.png`,
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any',
             },
             {
-              src: '/pwa-maskable-512x512.png',
+              src: `${base}pwa-maskable-512x512.png`,
               sizes: '512x512',
               type: 'image/png',
               purpose: 'maskable',
