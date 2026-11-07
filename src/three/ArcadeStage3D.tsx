@@ -237,7 +237,7 @@ export const ArcadeStage3D = forwardRef<ArcadeStageHandle, ArcadeStageProps>(
       );
       renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.shadowMap.enabled = !isSoftwareGl;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.shadowMap.type = THREE.PCFShadowMap;
 
       container.innerHTML = '';
       container.appendChild(renderer.domElement);
