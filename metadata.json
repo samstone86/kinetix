@@ -1,0 +1,6 @@
+{
+  "name": "Kinetix // 11 — 3D Synth-Grid Arcade Vault",
+  "description": "An 11-in-1 3D WebGL synth-grid arcade vault featuring Gauntlet Blitz mode, Prism Drop, Cyber Pac, Void Runner, Nova Invaders, and more.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

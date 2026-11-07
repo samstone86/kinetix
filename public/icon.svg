@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#07090E" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+    <linearGradient id="cyanGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22D3EE" />
+      <stop offset="100%" stop-color="#0284C7" />
+    </linearGradient>
+    <linearGradient id="roseGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FB7185" />
+      <stop offset="100%" stop-color="#E11D48" />
+    </linearGradient>
+    <linearGradient id="emeraldGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)" />
+  <rect x="24" y="24" width="464" height="464" rx="92" fill="none" stroke="#1E293B" stroke-width="6" />
+  <!-- Prism Drop T-block (Top Left) -->
+  <g transform="translate(88, 92)">
+    <rect x="0" y="0" width="44" height="44" rx="8" fill="url(#cyanGlow)" />
+    <rect x="48" y="0" width="44" height="44" rx="8" fill="url(#cyanGlow)" />
+    <rect x="96" y="0" width="44" height="44" rx="8" fill="url(#cyanGlow)" />
+    <rect x="48" y="48" width="44" height="44" rx="8" fill="url(#cyanGlow)" />
+  </g>
+  <!-- Quantum Grid X-O (Top Right) -->
+  <g transform="translate(292, 96)">
+    <circle cx="64" cy="44" r="36" fill="none" stroke="url(#roseGlow)" stroke-width="16" />
+    <path d="M12 110 L56 154 M56 110 L12 154" stroke="url(#cyanGlow)" stroke-width="16" stroke-linecap="round" />
+  </g>
+  <!-- Viper Pulse Snake (Bottom) -->
+  <g transform="translate(96, 296)">
+    <path d="M16 88 H160 C192 88 192 32 224 32 H304" fill="none" stroke="url(#emeraldGlow)" stroke-width="32" stroke-linecap="round" />
+    <circle cx="320" cy="32" r="14" fill="#F59E0B" />
+  </g>
+</svg>
