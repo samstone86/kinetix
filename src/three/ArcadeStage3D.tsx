@@ -238,6 +238,8 @@ export const ArcadeStage3D = forwardRef<ArcadeStageHandle, ArcadeStageProps>(
       renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.shadowMap.enabled = !isSoftwareGl;
       renderer.shadowMap.type = THREE.PCFShadowMap;
+      renderer.shadowMap.autoUpdate = false;
+      renderer.shadowMap.needsUpdate = !isSoftwareGl;
 
       container.innerHTML = '';
       container.appendChild(renderer.domElement);
@@ -267,7 +269,7 @@ export const ArcadeStage3D = forwardRef<ArcadeStageHandle, ArcadeStageProps>(
       const keyLight = new THREE.DirectionalLight(0xfff7ed, 2.2);
       keyLight.position.set(8, 18, 12);
       keyLight.castShadow = !isSoftwareGl;
-      const shadowRes = isMobileDevice ? 512 : 1024;
+      const shadowRes = 512;
       keyLight.shadow.mapSize.set(shadowRes, shadowRes);
       keyLight.shadow.camera.near = 1;
       keyLight.shadow.camera.far = 50;
@@ -472,10 +474,15 @@ export const ArcadeStage3D = forwardRef<ArcadeStageHandle, ArcadeStageProps>(
 
       let tetrisBoardDirty = true;
       let lastActiveColor = -1;
+      let lastActiveX = -999;
+      let lastActiveY = -999;
+      let lastActiveRot = -999;
+      let lastShowGhost = false;
 
       const rebuildTetrisVisuals = () => {
         const currentColor = TETROMINO_DEFS[tetrisEngine.activeType].color;
-        if (currentColor !== lastActiveColor) {
+        const colorChanged = currentColor !== lastActiveColor;
+        if (colorChanged) {
           lastActiveColor = currentColor;
           activeTetrominoMeshes.forEach((m, idx) => {
             tetrisGroup.remove(m);
@@ -491,28 +498,43 @@ export const ArcadeStage3D = forwardRef<ArcadeStageHandle, ArcadeStageProps>(
           });
         }
 
-        const activeCells = tetrisEngine.getCells(
-          tetrisEngine.activeX,
-          tetrisEngine.activeY,
-          tetrisEngine.activeRot
-        );
-        const ghostY = tetrisEngine.getGhostY();
-        const ghostCells = tetrisEngine.getCells(
-          tetrisEngine.activeX,
-          ghostY,
-          tetrisEngine.activeRot
-        );
-        const showGhost =
-          stateRef.current.config.tetris.ghostPiece && ghostY !== tetrisEngine.activeY;
+        const ghostPref = stateRef.current.config.tetris.ghostPiece;
+        const poseChanged =
+          colorChanged ||
+          tetrisBoardDirty ||
+          tetrisEngine.activeX !== lastActiveX ||
+          tetrisEngine.activeY !== lastActiveY ||
+          tetrisEngine.activeRot !== lastActiveRot ||
+          ghostPref !== lastShowGhost;
 
-        for (let i = 0; i < 4; i++) {
-          const [ax, ay] = activeCells[i];
-          activeTetrominoMeshes[i].visible = !tetrisEngine.isGameOver;
-          activeTetrominoMeshes[i].position.set(ax - 4.5, ay + 1.0, 0);
+        if (poseChanged) {
+          lastActiveX = tetrisEngine.activeX;
+          lastActiveY = tetrisEngine.activeY;
+          lastActiveRot = tetrisEngine.activeRot;
+          lastShowGhost = ghostPref;
 
-          const [gx, gy] = ghostCells[i];
-          ghostTetrominoMeshes[i].visible = showGhost && !tetrisEngine.isGameOver;
-          ghostTetrominoMeshes[i].position.set(gx - 4.5, gy + 1.0, 0);
+          const activeCells = tetrisEngine.getCells(
+            tetrisEngine.activeX,
+            tetrisEngine.activeY,
+            tetrisEngine.activeRot
+          );
+          const ghostY = tetrisEngine.getGhostY();
+          const ghostCells = tetrisEngine.getCells(
+            tetrisEngine.activeX,
+            ghostY,
+            tetrisEngine.activeRot
+          );
+          const showGhost = ghostPref && ghostY !== tetrisEngine.activeY;
+
+          for (let i = 0; i < 4; i++) {
+            const [ax, ay] = activeCells[i];
+            activeTetrominoMeshes[i].visible = !tetrisEngine.isGameOver;
+            activeTetrominoMeshes[i].position.set(ax - 4.5, ay + 1.0, 0);
+
+            const [gx, gy] = ghostCells[i];
+            ghostTetrominoMeshes[i].visible = showGhost && !tetrisEngine.isGameOver;
+            ghostTetrominoMeshes[i].position.set(gx - 4.5, gy + 1.0, 0);
+          }
         }
 
         if (tetrisBoardDirty) {
@@ -2148,6 +2170,7 @@ export const ArcadeStage3D = forwardRef<ArcadeStageHandle, ArcadeStageProps>(
       // 60FPS SIMULATION & RENDER LOOP (ZERO RUNTIME GPU ALLOCATIONS)
       // ========================================================================
       let frameId = 0;
+      let frameCount = 0;
       let prevShellState: ShellState = stateRef.current.shellState;
       let prevGameId: GameId = stateRef.current.selectedGame;
       let lastTime = performance.now();
@@ -2865,11 +2888,40 @@ export const ArcadeStage3D = forwardRef<ArcadeStageHandle, ArcadeStageProps>(
           particleMesh.instanceMatrix.needsUpdate = true;
         }
 
+        frameCount++;
+        if (!isSoftwareGl && frameCount % 2 === 0) {
+          renderer.shadowMap.needsUpdate = true;
+        }
         renderer.render(scene, camera);
         if (isSoftwareGl) afterDraw(tick);
         else frameId = requestAnimationFrame(tick);
       }
 
+      // Pre-compile all WebGL shaders & upload GPU textures outside requestAnimationFrame
+      // so the first RAF tick and game switches never stall the frame budget.
+      const allStageGroups = [
+        hubGroup,
+        tetrisGroup,
+        xoGroup,
+        snakeGroup,
+        breakerGroup,
+        pongGroup,
+        connect4Group,
+        merge2048Group,
+        runnerGroup,
+        minesGroup,
+        invadersGroup,
+        pacGroup,
+      ];
+      allStageGroups.forEach((grp) => {
+        grp.visible = true;
+      });
+      renderer.compile(scene, camera);
+      allStageGroups.forEach((grp) => {
+        grp.visible = grp === hubGroup;
+      });
+      renderer.render(scene, camera);
+      lastTime = performance.now();
       frameId = requestAnimationFrame(tick);
 
       const handleResize = () => {
