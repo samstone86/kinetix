@@ -12,7 +12,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'first_launch',
     title: 'Neon Initiate',
-    description: 'Complete your first match in any Kinetix // 11 arena.',
+    description: 'Complete your first match in any Kinetix Arcade arena.',
     game: 'hub',
     xpReward: 100,
   },
@@ -124,7 +124,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'veteran_ten',
     title: 'Obsidian Sovereign',
-    description: 'Play 10 matches across the Kinetix // 11 vault.',
+    description: 'Play 10 matches across the Kinetix Arcade hub.',
     game: 'hub',
     xpReward: 350,
   },

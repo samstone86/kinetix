@@ -1,6 +1,6 @@
 {
-  "appId": "com.luminaarcade.hub",
-  "appName": "Lumina Arcade",
+  "appId": "com.kinetixarcade.hub",
+  "appName": "Kinetix Arcade",
   "webDir": "dist",
   "bundledWebRuntime": false,
   "server": {

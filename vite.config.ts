@@ -17,9 +17,9 @@ export default defineConfig(({command}) => {
         includeAssets: ['icon.svg', 'apple-touch-icon.png'],
         manifest: {
           id: base,
-          name: 'Kinetix // 11 — 3D Synth-Grid Arcade Vault',
-          short_name: 'Kinetix 11',
-          description: 'An 11-in-1 3D WebGL synth-grid arcade vault featuring Prism Drop, Cyber Pac, Void Runner, Nova Invaders, Aegis Breaker, and more.',
+          name: 'Kinetix Arcade — 3D Game Hub',
+          short_name: 'Kinetix',
+          description: 'Kinetix Arcade is an 11-in-1 3D WebGL synth-grid arcade hub featuring Prism Drop, Cyber Pac, Void Runner, Nova Invaders, Aegis Breaker, and more.',
           theme_color: '#07090E',
           background_color: '#07090E',
           display: 'standalone',

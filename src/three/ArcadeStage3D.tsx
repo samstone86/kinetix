@@ -2944,7 +2944,7 @@ export const ArcadeStage3D = forwardRef<ArcadeStageHandle, ArcadeStageProps>(
       <div
         ref={canvasMountRef}
         className="fixed inset-0 w-full h-full z-0 overflow-hidden bg-[#07090E] touch-none select-none"
-        aria-label="Kinetix 11 3D Arcade Stage"
+        aria-label="Kinetix Arcade 3D Stage"
       />
     );
   }

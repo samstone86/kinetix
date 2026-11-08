@@ -1,6 +1,6 @@
-# KINETIX // 11 — 3D Synth-Grid Arcade Vault
+# Kinetix Arcade — 3D Game Hub
 
-**KINETIX // 11** is a unified, zero-allocation 3D WebGL arcade game hub built with **React 19**, **Three.js**, **TypeScript**, and **Tailwind CSS**. Every game runs inside a continuous, shared 3D synth-grid stage with smooth camera choreography, dynamic per-game lighting atmospheres, procedural 3D geometry, synthesized Web Audio sound effects, and full desktop keyboard + mobile touch/gesture support.
+**Kinetix Arcade** is a unified, zero-allocation 3D WebGL arcade game hub built with **React 19**, **Three.js**, **TypeScript**, and **Tailwind CSS**. Every game runs inside a continuous, shared 3D synth-grid stage with smooth camera choreography, dynamic per-game lighting atmospheres, procedural 3D geometry, synthesized Web Audio sound effects, and full desktop keyboard + mobile touch/gesture support.
 
 ---
 

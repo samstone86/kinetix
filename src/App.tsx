@@ -42,6 +42,7 @@ import { ArcadeStage3D, ArcadeStageHandle } from './three/ArcadeStage3D';
 import { TouchArcadeDock } from './components/TouchArcadeDock';
 import { ProfileAndApkModal } from './components/ProfileAndApkModal';
 import { SettingsModal } from './components/SettingsModal';
+import { KinetixLogo } from './components/KinetixLogo';
 import { soundFX } from './services/soundAndHaptics';
 
 const GAME_CATALOG: Record<
@@ -525,20 +526,13 @@ export default function App() {
           <header className="w-full px-3 sm:px-6 pt-2.5 sm:pt-3 pb-1.5 sm:pb-2 flex items-center justify-between gap-2 sm:gap-4 pointer-events-auto">
             {shellState === 'HUB' ? (
               <div className="flex items-center gap-2.5 sm:gap-3 bg-[#0B0F19]/90 border border-slate-800/90 rounded-xl px-3 sm:px-3.5 py-1.5 sm:py-2 shadow-lg">
-                <svg className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" viewBox="0 0 36 36" fill="none">
-                  <polygon points="18,2 33,10 33,26 18,34 3,26 3,10" stroke="#06B6D4" strokeWidth="2.8" fill="#06B6D4" fillOpacity="0.12" />
-                  <path d="M12 11V25M12 18L22 11M15 16L23 25" stroke="#F8FAFC" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                  <circle cx="25.5" cy="18" r="2.5" fill="#F43F5E" />
-                </svg>
+                <KinetixLogo className="w-6 h-6 sm:w-7 sm:h-7 shrink-0 rounded-md" />
                 <div className="flex items-center">
                   <span className="text-xs sm:text-base font-extrabold font-display tracking-wider text-white whitespace-nowrap">
-                    KINETIX
-                  </span>
-                  <span className="ml-1.5 px-1.5 py-0.5 rounded bg-cyan-500/15 border border-cyan-500/40 text-[10px] sm:text-xs font-mono font-bold text-cyan-300">
-                    // 11
+                    KINETIX ARCADE
                   </span>
                   <span className="hidden md:inline-block text-xs text-slate-400 ml-2.5">
-                    3D Synth-Grid Vault
+                    11-in-1 3D Game Hub
                   </span>
                 </div>
               </div>

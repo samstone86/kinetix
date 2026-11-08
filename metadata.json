@@ -1,6 +1,6 @@
 {
-  "name": "Kinetix // 11 — 3D Synth-Grid Arcade Vault",
-  "description": "An 11-in-1 3D WebGL synth-grid arcade vault featuring Prism Drop, Cyber Pac, Void Runner, Nova Invaders, Aegis Breaker, and more.",
+  "name": "Kinetix Arcade — 3D Game Hub",
+  "description": "Kinetix Arcade is an 11-in-1 3D WebGL synth-grid arcade hub featuring Prism Drop, Cyber Pac, Void Runner, Nova Invaders, Aegis Breaker, and more.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
