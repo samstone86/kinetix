@@ -7,11 +7,10 @@
 ## ✨ Key Features
 
 - **11 Complete 3D Arcade Games in One Persistent Stage**: Instant camera transitions between the orbital 3D Hub Carousel and any of the 11 arenas without page reloads or canvas teardown.
-- **Arcade Gauntlet Blitz (3-Game Relay Mode)**: High-stakes 3-stage survival relay with escalating score multipliers (**`1.0×` → `1.5×` → `2.5×`**), inter-stage warp transitions, shufflable game lineups, and dedicated Gauntlet High Score tracking.
-- **Dynamic Per-Game 3D Atmosphere**: Smooth 60fps RGB interpolation (`THREE.Color.lerp`) of key lights, rim lights, ground grid lines, orbital rings, and exponential fog tailored to each game's signature palette (plus Crimson/Amber overdrive lighting during Gauntlet Blitz).
+- **Dynamic Per-Game 3D Atmosphere**: Smooth 60fps RGB interpolation (`THREE.Color.lerp`) of key lights, rim lights, ground grid lines, orbital rings, and exponential fog tailored to each game's signature palette.
 - **Procedural 3D Models & Zero-Allocation Particle Pooling**: Custom `ExtrudeGeometry` starfighters, articulated serpents, neon mazes, and pre-allocated `InstancedMesh` voxel/explosion pools for locked 60fps performance.
 - **Synthesized Web Audio & Haptics**: Pure Web Audio API procedural sound effects (no external audio files required) paired with mobile vibration feedback.
-- **Progression, Daily Directives & Achievements**: Local persistent player profile with XP, rank titles, 18 unlockable achievements, per-game high scores, and rotating daily challenges.
+- **Progression, Daily Directives & Achievements**: Local persistent player profile with XP, rank titles, 17 unlockable achievements, per-game high scores, and rotating daily challenges.
 - **Adaptive Desktop & Mobile Controls**: Supports keyboard (`WASD` / Arrow keys / `Space`), direct 3D raycast pointer/touch dragging, swipe gestures, and a collapsible on-screen `TouchArcadeDock` whose visibility persists across sessions.
 
 ---
@@ -51,10 +50,10 @@
 ├── metadata.json               # App capability & manifest metadata
 ├── vite.config.ts              # Vite + Tailwind v4 + PWA configuration
 └── src/
-    ├── App.tsx                 # Main application shell, HUD, Gauntlet relay & modals
+    ├── App.tsx                 # Main application shell, HUD & modals
     ├── main.tsx                # React 19 root mount
     ├── types/
-    │   └── arcade.ts           # Shared TypeScript interfaces for games, HUD, and Gauntlet
+    │   └── arcade.ts           # Shared TypeScript interfaces for games, HUD & profile
     ├── components/
     │   └── TouchArcadeDock.tsx # Collapsible context-aware bottom control deck
     ├── services/

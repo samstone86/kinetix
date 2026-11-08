@@ -86,7 +86,6 @@ interface ArcadeStageProps {
   shellState: ShellState;
   selectedGame: GameId;
   config: GameConfig;
-  gauntletActive?: boolean;
   onSelectHubGame: (game: GameId) => void;
   onHudUpdate: (hud: LiveGameHUDState) => void;
   onGameEnd: (
@@ -169,7 +168,6 @@ export const ArcadeStage3D = forwardRef<ArcadeStageHandle, ArcadeStageProps>(
       shellState,
       selectedGame,
       config,
-      gauntletActive = false,
       onSelectHubGame,
       onHudUpdate,
       onGameEnd,
@@ -182,7 +180,6 @@ export const ArcadeStage3D = forwardRef<ArcadeStageHandle, ArcadeStageProps>(
       shellState,
       selectedGame,
       config,
-      gauntletActive,
       onSelectHubGame,
       onHudUpdate,
       onGameEnd,
@@ -192,12 +189,11 @@ export const ArcadeStage3D = forwardRef<ArcadeStageHandle, ArcadeStageProps>(
         shellState,
         selectedGame,
         config,
-        gauntletActive,
         onSelectHubGame,
         onHudUpdate,
         onGameEnd,
       };
-    }, [shellState, selectedGame, config, gauntletActive, onSelectHubGame, onHudUpdate, onGameEnd]);
+    }, [shellState, selectedGame, config, onSelectHubGame, onHudUpdate, onGameEnd]);
 
     const actionsRef = useRef<ArcadeStageHandle['triggerAction']>(() => {});
 
@@ -2251,13 +2247,8 @@ export const ArcadeStage3D = forwardRef<ArcadeStageHandle, ArcadeStageProps>(
           scene.fog.color.lerp(_targetFogColor, colorLerp);
         }
 
-        const isGauntletOverdrive = stateRef.current.gauntletActive;
-        rimLight.intensity = isGauntletOverdrive
-          ? 6.4 + Math.sin(elapsed * 6) * 0.8
-          : 5.2 + Math.sin(elapsed * 2.5) * 0.35;
-        floorMat.emissiveIntensity = isGauntletOverdrive
-          ? 0.45 + Math.sin(elapsed * 5) * 0.08
-          : 0.32;
+        rimLight.intensity = 5.2 + Math.sin(elapsed * 2.5) * 0.35;
+        floorMat.emissiveIntensity = 0.32;
 
         const aspect = camera.aspect;
         // Responsive Portrait Factor for tall 20:9 phones (e.g., Google Pixel 8a)

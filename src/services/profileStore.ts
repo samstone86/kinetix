@@ -128,13 +128,6 @@ export const ACHIEVEMENTS: Achievement[] = [
     game: 'hub',
     xpReward: 350,
   },
-  {
-    id: 'gauntlet_champion',
-    title: 'Gauntlet Grandmaster',
-    description: 'Complete a 3-Game Gauntlet Blitz Relay with escalating score multipliers.',
-    game: 'hub',
-    xpReward: 500,
-  },
 ];
 
 export const DAILY_CHALLENGE_POOL: DailyChallengeTemplate[] = [
@@ -443,8 +436,6 @@ export const DEFAULT_PROFILE: PlayerProfile = {
     invadersScore: 0,
     pacScore: 0,
     pacMaxWave: 1,
-    gauntletBestScore: 0,
-    gauntletRunsCompleted: 0,
   },
   unlockedAchievementIds: [],
   dailyChallenge: createInitialDailyProgress(),

@@ -13,8 +13,6 @@ import {
   Flame,
   CheckCircle2,
   RefreshCw,
-  Zap,
-  Shuffle,
 } from 'lucide-react';
 import {
   ACHIEVEMENTS,
@@ -32,8 +30,6 @@ import {
   DailyChallengeTemplate,
   GameConfig,
   GameId,
-  GauntletSessionState,
-  GauntletStageResult,
   LiveGameHUDState,
   MinesDensity,
   PlayerProfile,
@@ -160,32 +156,12 @@ const GAME_CATALOG: Record<
   },
 };
 
-const GAUNTLET_MULTIPLIERS: [number, number, number] = [1.0, 1.5, 2.5];
-
-function draftRandomGauntletLineup(excludeFirst?: GameId): [GameId, GameId, GameId] {
-  const pool = [...ALL_GAME_IDS];
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
-  }
-  if (excludeFirst && pool[0] === excludeFirst) {
-    [pool[0], pool[3]] = [pool[3], pool[0]];
-  }
-  return [pool[0], pool[1], pool[2]];
-}
-
 export default function App() {
   const stageRef = useRef<ArcadeStageHandle | null>(null);
 
   const [shellState, setShellState] = useState<ShellState>('HUB');
   const [selectedGame, setSelectedGame] = useState<GameId>('tetris');
   const [profile, setProfile] = useState<PlayerProfile>(() => loadProfile());
-  const [gauntletLineup, setGauntletLineup] = useState<[GameId, GameId, GameId]>(() => [
-    'tetris',
-    'runner',
-    'pac',
-  ]);
-  const [gauntletSession, setGauntletSession] = useState<GauntletSessionState | null>(null);
 
   const [config, setConfig] = useState<GameConfig>({
     tetris: { startLevel: 1, ghostPiece: true },
@@ -278,7 +254,6 @@ export default function App() {
 
   const handleLaunchGame = useCallback((gameToLaunch?: GameId) => {
     soundFX.playUiTap();
-    setGauntletSession(null);
     if (gameToLaunch) {
       setSelectedGame(gameToLaunch);
     }
@@ -286,59 +261,12 @@ export default function App() {
     setShellState('PLAYING');
   }, []);
 
-  const handleShuffleGauntlet = useCallback(() => {
-    soundFX.playHubSwitch();
-    setGauntletLineup((prev) => {
-      const next = draftRandomGauntletLineup(prev[0]);
-      setSelectedGame(next[0]);
-      return next;
-    });
-  }, []);
-
-  const handleLaunchGauntlet = useCallback(() => {
-    soundFX.playUiTap();
-    setGauntletSession({
-      active: true,
-      lineup: gauntletLineup,
-      stageIndex: 0,
-      results: [],
-      awaitingNextStage: false,
-      completed: false,
-    });
-    setSelectedGame(gauntletLineup[0]);
-    setLastMatchSummary(null);
-    setShellState('PLAYING');
-  }, [gauntletLineup]);
-
-  const handleAdvanceGauntletStage = useCallback(() => {
-    if (!gauntletSession || !gauntletSession.active || gauntletSession.stageIndex >= 2) return;
-    const nextIdx = (gauntletSession.stageIndex + 1) as 0 | 1 | 2;
-    const nextGame = gauntletSession.lineup[nextIdx];
-    soundFX.playUiTap();
-    setGauntletSession({
-      ...gauntletSession,
-      stageIndex: nextIdx,
-      awaitingNextStage: false,
-    });
-    setSelectedGame(nextGame);
-    setLastMatchSummary(null);
-    setShellState('PLAYING');
-  }, [gauntletSession]);
-
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (showProfileModal || showSettingsModal) return;
       if (shellState === 'HUB' && (e.code === 'Enter' || e.code === 'Space')) {
         e.preventDefault();
         handleLaunchGame();
-      } else if (
-        (shellState === 'VICTORY' || shellState === 'GAME_OVER') &&
-        gauntletSession?.active &&
-        gauntletSession.awaitingNextStage &&
-        (e.code === 'Enter' || e.code === 'Space')
-      ) {
-        e.preventDefault();
-        handleAdvanceGauntletStage();
       } else if (shellState === 'HUB' && (e.code === 'ArrowLeft' || e.code === 'KeyA')) {
         e.preventDefault();
         const idx = ALL_GAME_IDS.indexOf(selectedGame);
@@ -367,9 +295,7 @@ export default function App() {
     selectedGame,
     showProfileModal,
     showSettingsModal,
-    gauntletSession,
     handleLaunchGame,
-    handleAdvanceGauntletStage,
   ]);
 
   const handleGameEnd = useCallback(
@@ -515,54 +441,11 @@ export default function App() {
           tryUnlock('daily_challenger');
         }
 
-        let gauntletBonusXp = 0;
-        let finalDisplayScore = summary.score;
-
-        if (gauntletSession?.active) {
-          const mult = GAUNTLET_MULTIPLIERS[gauntletSession.stageIndex];
-          const baseStageScore =
-            outcome === 'VICTORY'
-              ? Math.max(600, summary.score + 400)
-              : Math.max(120, summary.score);
-          const multipliedScore = Math.round(baseStageScore * mult);
-          finalDisplayScore = multipliedScore;
-
-          const stageEntry: GauntletStageResult = {
-            game: summary.game,
-            rawScore: baseStageScore,
-            multiplier: mult,
-            multipliedScore,
-            outcome,
-          };
-          const nextResults = [...gauntletSession.results, stageEntry];
-          const isFinalStage = gauntletSession.stageIndex >= 2;
-
-          if (isFinalStage) {
-            const totalGauntletScore = nextResults.reduce((acc, r) => acc + r.multipliedScore, 0);
-            if (totalGauntletScore > (hs.gauntletBestScore || 0)) {
-              hs.gauntletBestScore = totalGauntletScore;
-              isNewBest = true;
-            }
-            hs.gauntletRunsCompleted = (hs.gauntletRunsCompleted || 0) + 1;
-            tryUnlock('gauntlet_champion');
-            gauntletBonusXp = 350;
-            finalDisplayScore = totalGauntletScore;
-          }
-
-          setGauntletSession({
-            ...gauntletSession,
-            results: nextResults,
-            awaitingNextStage: !isFinalStage,
-            completed: isFinalStage,
-          });
-        }
-
         const achXp = newlyUnlocked.reduce((acc, a) => acc + a.xpReward, 0);
         const matchXp =
           Math.max(40, Math.min(450, Math.round(summary.score * 0.15) + 50)) +
           achXp +
-          dailyEval.bonusXpEarned +
-          gauntletBonusXp;
+          dailyEval.bonusXpEarned;
 
         const updated: PlayerProfile = {
           ...prev,
@@ -576,7 +459,7 @@ export default function App() {
 
         setLastMatchSummary({
           outcome,
-          score: finalDisplayScore,
+          score: summary.score,
           xpEarned: matchXp,
           isNewBest,
           newlyUnlocked,
@@ -588,7 +471,7 @@ export default function App() {
 
       setShellState(outcome);
     },
-    [config.xo.mode, config.xo.difficulty, gauntletSession]
+    [config.xo.mode, config.xo.difficulty]
   );
 
   const activeCatalog = GAME_CATALOG[selectedGame];
@@ -630,7 +513,6 @@ export default function App() {
         shellState={shellState}
         selectedGame={selectedGame}
         config={config}
-        gauntletActive={Boolean(gauntletSession?.active)}
         onSelectHubGame={(g) => setSelectedGame(g)}
         onHudUpdate={setHud}
         onGameEnd={handleGameEnd}
@@ -711,19 +593,6 @@ export default function App() {
                         <div className="text-[10px] font-semibold text-slate-400">NEXT</div>
                         <div className="text-sm font-bold font-mono text-amber-300">
                           {hud.nextPieceType}-BLOCK
-                        </div>
-                      </div>
-                    </>
-                  )}
-                  {gauntletSession?.active && (
-                    <>
-                      <div className="h-6 w-px bg-slate-800" />
-                      <div>
-                        <div className="text-[10px] font-semibold text-amber-400 whitespace-nowrap">
-                          BLITZ {gauntletSession.stageIndex + 1}/3
-                        </div>
-                        <div className="text-xs sm:text-sm font-bold font-mono tabular-nums text-amber-300 whitespace-nowrap">
-                          {GAUNTLET_MULTIPLIERS[gauntletSession.stageIndex].toFixed(1)}× MULT
                         </div>
                       </div>
                     </>
@@ -1210,42 +1079,10 @@ export default function App() {
                   <span className="sm:hidden">LAUNCH</span>
                   <span className="hidden sm:inline">LAUNCH {activeCatalog.title}</span>
                 </button>
-
-                {/* 3-Game Gauntlet Blitz Quick Launch + Lineup Re-Roll */}
-                <div className="flex items-center gap-1 shrink-0">
-                  <button
-                    onClick={handleLaunchGauntlet}
-                    className="min-h-[36px] sm:min-h-[44px] px-2.5 sm:px-3.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-rose-500/20 hover:from-amber-500/30 hover:to-rose-500/30 border border-amber-400/50 text-amber-200 font-display font-bold text-[11px] sm:text-xs flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0"
-                    title={`Launch 3-Game Blitz Relay: ${gauntletLineup
-                      .map((id) => GAME_CATALOG[id].shortTab)
-                      .join(' → ')}`}
-                  >
-                    <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span>3-Game Blitz</span>
-                    <span className="hidden md:inline text-amber-300/90 font-mono tabular-nums">
-                      · 2.5×
-                    </span>
-                  </button>
-                  <button
-                    onClick={handleShuffleGauntlet}
-                    className="min-h-[36px] sm:min-h-[44px] min-w-[36px] sm:min-w-[44px] px-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-300 hover:text-amber-300 flex items-center justify-center transition-colors shrink-0"
-                    aria-label="Shuffle 3-Game Blitz Lineup"
-                    title={`Shuffle Blitz Lineup (${gauntletLineup
-                      .map((id) => GAME_CATALOG[id].shortTab)
-                      .join(' · ')})`}
-                  >
-                    <Shuffle className="w-3.5 h-3.5" />
-                  </button>
-                </div>
               </div>
 
               <div className="hidden sm:flex items-center justify-between text-[11px] text-slate-400 gap-4 w-full">
                 <span className="truncate">{activeCatalog.controlsHint}</span>
-                <span className="font-mono tabular-nums text-amber-300/90 whitespace-nowrap shrink-0">
-                  Blitz Slate: {GAME_CATALOG[gauntletLineup[0]].shortTab} (1.0×) ·{' '}
-                  {GAME_CATALOG[gauntletLineup[1]].shortTab} (1.5×) ·{' '}
-                  {GAME_CATALOG[gauntletLineup[2]].shortTab} (2.5×)
-                </span>
               </div>
             </div>
           </div>
@@ -1264,25 +1101,17 @@ export default function App() {
         )}
       </div>
 
-      {/* PAUSE / VICTORY / GAME OVER / GAUNTLET RELAY MODAL */}
+      {/* PAUSE / VICTORY / GAME OVER MODAL */}
       {(shellState === 'PAUSED' || shellState === 'VICTORY' || shellState === 'GAME_OVER') && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/80 p-4 pointer-events-auto">
           <div className="w-full max-w-md rounded-2xl bg-[#0B0F19] border border-slate-800 p-6 shadow-2xl text-center space-y-5">
             <div>
               <div className="text-xs font-semibold tracking-wider text-cyan-400">
-                {gauntletSession?.active
-                  ? `GAUNTLET BLITZ · STAGE ${gauntletSession.stageIndex + 1} OF 3 · ${GAUNTLET_MULTIPLIERS[
-                      gauntletSession.stageIndex
-                    ].toFixed(1)}× MULTIPLIER`
-                  : activeCatalog.title}
+                {activeCatalog.title}
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-white mt-1">
                 {shellState === 'PAUSED'
                   ? 'SYSTEM PAUSED'
-                  : gauntletSession?.active && gauntletSession.awaitingNextStage
-                  ? `STAGE ${gauntletSession.stageIndex + 1} COMPLETE`
-                  : gauntletSession?.active && gauntletSession.completed
-                  ? 'GAUNTLET BLITZ COMPLETE'
                   : selectedGame === 'xo' && lastMatchSummary?.xoWinner === 'DRAW'
                   ? 'QUANTUM STALEMATE'
                   : shellState === 'VICTORY'
@@ -1301,13 +1130,7 @@ export default function App() {
             {shellState !== 'PAUSED' && lastMatchSummary && (
               <div className="grid grid-cols-2 gap-3 bg-[#07090E] p-3.5 rounded-xl border border-slate-800">
                 <div>
-                  <div className="text-[11px] text-slate-400">
-                    {gauntletSession?.active && gauntletSession.completed
-                      ? 'TOTAL GAUNTLET SCORE'
-                      : gauntletSession?.active
-                      ? 'STAGE MULTIPLIED SCORE'
-                      : 'FINAL SCORE'}
-                  </div>
+                  <div className="text-[11px] text-slate-400">FINAL SCORE</div>
                   <div className="text-xl font-bold font-mono tabular-nums text-white mt-0.5">
                     {lastMatchSummary.score.toLocaleString()}
                   </div>
@@ -1317,53 +1140,6 @@ export default function App() {
                   <div className="text-xl font-bold font-mono tabular-nums text-emerald-400 mt-0.5">
                     +{lastMatchSummary.xpEarned} XP
                   </div>
-                </div>
-              </div>
-            )}
-
-            {/* Gauntlet 3-Stage Relay Breakdown */}
-            {shellState !== 'PAUSED' && gauntletSession?.active && (
-              <div className="space-y-1.5 text-left bg-[#07090E] p-3 rounded-xl border border-slate-800">
-                <div className="text-[11px] font-semibold text-amber-300 flex items-center justify-between">
-                  <span>3-GAME BLITZ RELAY SLATE</span>
-                  <span className="font-mono tabular-nums">
-                    TOTAL:{' '}
-                    {gauntletSession.results
-                      .reduce((acc, r) => acc + r.multipliedScore, 0)
-                      .toLocaleString()}{' '}
-                    PTS
-                  </span>
-                </div>
-                <div className="space-y-1">
-                  {gauntletSession.lineup.map((gid, idx) => {
-                    const res = gauntletSession.results[idx];
-                    const mult = GAUNTLET_MULTIPLIERS[idx];
-                    const isNext =
-                      gauntletSession.awaitingNextStage && idx === gauntletSession.stageIndex + 1;
-                    return (
-                      <div
-                        key={`${gid}-${idx}`}
-                        className={`px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs ${
-                          res
-                            ? 'bg-slate-900/90 text-slate-100'
-                            : isNext
-                            ? 'bg-amber-500/15 border border-amber-400/40 text-amber-200'
-                            : 'text-slate-500'
-                        }`}
-                      >
-                        <span className="font-medium truncate">
-                          {idx + 1}. {GAME_CATALOG[gid].shortTab} · {mult.toFixed(1)}×
-                        </span>
-                        <span className="font-mono tabular-nums font-bold">
-                          {res
-                            ? `${res.multipliedScore.toLocaleString()} PTS`
-                            : isNext
-                            ? 'UP NEXT'
-                            : 'LOCKED'}
-                        </span>
-                      </div>
-                    );
-                  })}
                 </div>
               </div>
             )}
@@ -1431,37 +1207,17 @@ export default function App() {
                 </button>
               )}
 
-              {shellState !== 'PAUSED' &&
-              gauntletSession?.active &&
-              gauntletSession.awaitingNextStage ? (
-                <button
-                  onClick={handleAdvanceGauntletStage}
-                  className="w-full min-h-[46px] rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-display font-bold text-sm flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(250,204,21,0.35)]"
-                >
-                  <Zap className="w-4 h-4 fill-current" />
-                  Warp to Stage {gauntletSession.stageIndex + 2}:{' '}
-                  {GAME_CATALOG[gauntletSession.lineup[gauntletSession.stageIndex + 1]].shortTab} (
-                  {GAUNTLET_MULTIPLIERS[gauntletSession.stageIndex + 1].toFixed(1)}×)
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    soundFX.playUiTap();
-                    if (gauntletSession?.active && gauntletSession.completed) {
-                      handleLaunchGauntlet();
-                    } else {
-                      setShellState('PLAYING');
-                      setTimeout(() => stageRef.current?.triggerAction('restart'), 15);
-                    }
-                  }}
-                  className="w-full min-h-[46px] rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm flex items-center justify-center gap-2 border border-slate-700"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  {gauntletSession?.active && gauntletSession.completed
-                    ? 'Replay 3-Game Gauntlet Blitz'
-                    : 'Play Again'}
-                </button>
-              )}
+              <button
+                onClick={() => {
+                  soundFX.playUiTap();
+                  setShellState('PLAYING');
+                  setTimeout(() => stageRef.current?.triggerAction('restart'), 15);
+                }}
+                className="w-full min-h-[46px] rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm flex items-center justify-center gap-2 border border-slate-700"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Play Again
+              </button>
 
               {shellState === 'PAUSED' && (
                 <button
@@ -1479,7 +1235,6 @@ export default function App() {
               <button
                 onClick={() => {
                   soundFX.playUiTap();
-                  setGauntletSession(null);
                   setShellState('HUB');
                 }}
                 className="w-full min-h-[46px] rounded-xl bg-[#07090E] hover:bg-slate-900 text-slate-300 font-semibold text-sm flex items-center justify-center gap-2 border border-slate-800"

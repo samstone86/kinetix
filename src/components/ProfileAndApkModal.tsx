@@ -89,12 +89,6 @@ export const ProfileAndApkModal: React.FC<ProfileAndApkModalProps> = ({
       val: (profile.highScores.pacScore ?? 0).toLocaleString(),
       sub: `Max Wave: ${profile.highScores.pacMaxWave ?? 1}`,
     },
-    {
-      name: '3-Game Gauntlet Blitz',
-      color: 'text-amber-400',
-      val: (profile.highScores.gauntletBestScore ?? 0).toLocaleString(),
-      sub: `Relays Completed: ${profile.highScores.gauntletRunsCompleted ?? 0}`,
-    },
   ];
 
   return (

@@ -141,28 +141,9 @@ export interface PlayerProfile {
     invadersScore: number;
     pacScore: number;
     pacMaxWave: number;
-    gauntletBestScore: number;
-    gauntletRunsCompleted: number;
   };
   unlockedAchievementIds: string[];
   dailyChallenge: DailyChallengeProgress;
-}
-
-export interface GauntletStageResult {
-  game: GameId;
-  rawScore: number;
-  multiplier: number;
-  multipliedScore: number;
-  outcome: 'VICTORY' | 'GAME_OVER';
-}
-
-export interface GauntletSessionState {
-  active: boolean;
-  lineup: [GameId, GameId, GameId];
-  stageIndex: 0 | 1 | 2;
-  results: GauntletStageResult[];
-  awaitingNextStage: boolean;
-  completed: boolean;
 }
 
 export interface LiveGameHUDState {
